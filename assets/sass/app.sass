@@ -1,0 +1,50 @@
+// 變數
+@import './helper/css-reset.sass'
+@import './helper/variable.sass'
+
+// 套件
+
+*
+  color: $gray
+  box-sizing: border-box
+  font-family: $font-weight-normal
+  -webkit-font-smoothing: antialiased
+  -moz-osx-font-smoothing: grayscale
+  line-height: $body-line-height
+  // border: solid 1px !important
+  a
+    text-decoration: none
+
+html,body,#__nuxt,#__layout
+  width: 100%
+  height: 100%
+  position: relative
+  background-color: $black
+
+html
+  ::-webkit-scrollbar
+    width: 8px
+  ::-webkit-scrollbar-thumb
+    background-color: $panel-border
+    background-clip: padding-box
+    border-radius: 0
+
+body
+  overflow-x: hidden
+
+h1, h2, h3, h4
+  color: $white
+  font-family: $font-weight-bold
+
+.input
+  padding: 0 14px
+  outline: none
+  color: $white
+  min-height: 38px
+  line-height: 28px
+  background-color: transparent
+  border: $border
+  border-radius: 22px
+  max-width: 100%
+  &.pool-input
+    width: 100px
