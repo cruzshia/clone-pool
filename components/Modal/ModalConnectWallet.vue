@@ -12,82 +12,41 @@
             address="xxxxx",
             :size="20"
           )
-          p 0x15c8...52f3
+          p {{ accountDisplay }}
           Icon(
             name="fa-external-link-alt",
             size="12"
           )
-        Button Log out
+        Button(:onClick="() => $emit('logout')") Log out
 
       div(
         v-else,
         class="container"
       )
         ul
-          li
-            Button(class="wallet" :onClick="onClick")
+          li(@click="$emit('connectWallet', 'metamask')")
+            Button(class="wallet")
               img(src="https://raw.githubusercontent.com/bonustrack/lock/master/connectors/assets/injected.png")
               p MetaMask
+          li(@click="$emit('connectWallet', 'walletconnect')")
+            Button(class="wallet")
+              img(src="https://app.uniswap.org/static/media/walletConnectIcon.8215855c.svg")
+              p WalletConnect
+          li(@click="$emit('connectWallet', 'coinbase')")
+            Button(class="wallet")
+              img(src="https://app.uniswap.org/static/media/coinbaseWalletIcon.62578f59.svg")
+              p Coinbase Wallet
     
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop } from 'vue-property-decorator'
-import Web3 from 'web3'
-import Web3Modal from 'web3modal'
-import WalletConnectProvider from '@walletconnect/web3-provider'
-import Fortmatic from 'fortmatic'
-import Torus from '@toruslabs/torus-embed'
-import Authereum from 'authereum'
+import { Component, Vue, Prop } from "vue-property-decorator";
 
 @Component
 export default class ModalConnectWallet extends Vue {
-  @Prop() isConnected!: boolean
-  @Prop() toggleConnectWallet!: () => void
-  async onClick() {
-    const providerOptions = {
-      walletconnect: {
-        package: WalletConnectProvider, // required
-        options: {
-          infuraId: '9d6ecc41833d434a921bf5de878f834f' // required
-        }
-      },
-      fortmatic: {
-        package: Fortmatic, // required
-        options: {
-          key: 'FORTMATIC_KEY' // required
-        }
-      },
-      torus: {
-        package: Torus, // required
-        options: {
-          /*
-          networkParams: {
-            host: 'https://localhost:8545', // optional
-            chainId: 1337, // optional
-            networkId: 1337 // optional
-          },
-          config: {
-            buildEnv: 'development' // optional
-          }
-          */
-        }
-      },
-      authereum: {
-        package: Authereum // required
-      }
-    }
-
-    const web3Modal = new Web3Modal({
-      network: 'mainnet', // optional
-      cacheProvider: false, // optional
-      providerOptions // required
-    })
-
-    const provider = await web3Modal.connect()
-
-    const web3 = new Web3(provider)
-  }
+  @Prop() isConnected!: boolean;
+  @Prop() accountDisplay!: string;
+  @Prop() toggleConnectWallet!: () => void;
 }
 </script>
 

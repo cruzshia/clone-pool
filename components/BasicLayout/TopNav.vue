@@ -2,8 +2,11 @@
   nav#top-nav
     ModalConnectWallet(
       v-if="showConnectWallet",
-      :isConnected="isConnected",
-      :toggleConnectWallet="toggleConnectWallet"
+      :isConnected="account",
+      :accountDisplay="accountDisplay"
+      :toggleConnectWallet="toggleConnectWallet",
+      @connectWallet="connectWallet",
+      @logout="logout"
     )
 
     .d-flex
@@ -14,33 +17,40 @@
 
       .right-side
         Button(
+          v-if="!account"
           class="button-primary"
           :onClick="onClickConnectWalletButton"
         ) Connect wallet
 
         //- Button(class="button-red") Wrong network
 
-        //- Button(:onClick="onClickConnectWalletButton")
-        //-   Avatar(
-        //-     address="0x1169...547f",
-        //-     :size="16"
-        //-   )
-        //-   span 0x1169...547f
+        Button(
+          v-else,
+          :onClick="onClickConnectWalletButton"
+        )
+          Avatar(
+            :address="account",
+            :size="16"
+          )
+          span {{ accountDisplay }}
 
           
 </template>
 
 <script lang="ts">
 import { Component, Vue, Prop, Emit } from "vue-property-decorator";
+import { Getter } from 'vuex-class'
 
 @Component
 export default class TopNav extends Vue {
   @Prop() sidebarIsOpen!: boolean;
 
+  @Getter("Auth/account") account!: string
+  @Getter("Auth/accountDisplay") accountDisplay!: string
+  @Getter("Auth/loginError") loginError!: boolean
+
   showConnectWallet: boolean = false;
-  isConnected: boolean = false;
   isLoading: boolean = false;
-  modalOpen: boolean = false;
 
   toggleConnectWallet(): void {
     this.showConnectWallet = !this.showConnectWallet;
@@ -48,6 +58,37 @@ export default class TopNav extends Vue {
 
   onClickConnectWalletButton(): void {
     this.toggleConnectWallet();
+  }
+
+  async connectWallet(wallet: string): Promise<void> {
+    switch (wallet) {
+      case 'metamask': {
+        await this.$store.dispatch('Auth/loginMetamask');
+        if (!this.loginError) {
+          this.onClickConnectWalletButton()
+        }
+        break
+      }
+      case 'walletconnect': {
+        await this.$store.dispatch('Auth/loginWalletConnect');
+        if (!this.loginError) {
+          this.onClickConnectWalletButton()
+        }
+        break
+      }
+      case 'coinbase': {
+        await this.$store.dispatch('Auth/loginCoinbaseWallet');
+        if (!this.loginError) {
+          this.onClickConnectWalletButton()
+        }
+        break
+      }
+    }
+  }
+
+  logout() {
+    this.showConnectWallet = false
+    this.$store.dispatch("Auth/logout")
   }
 
   @Emit("onClickNavIcon")
