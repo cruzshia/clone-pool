@@ -25,19 +25,69 @@
       )
         ul
           li
-            Button(class="wallet")
+            Button(class="wallet" :onClick="onClick")
               img(src="https://raw.githubusercontent.com/bonustrack/lock/master/connectors/assets/injected.png")
               p MetaMask
     
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop } from "vue-property-decorator";
+import { Component, Vue, Prop } from 'vue-property-decorator'
+import Web3 from 'web3'
+import Web3Modal from 'web3modal'
+import WalletConnectProvider from '@walletconnect/web3-provider'
+import Fortmatic from 'fortmatic'
+import Torus from '@toruslabs/torus-embed'
+import Authereum from 'authereum'
 
 @Component
 export default class ModalConnectWallet extends Vue {
-  @Prop() isConnected!: boolean;
-  @Prop() toggleConnectWallet!: () => void;
+  @Prop() isConnected!: boolean
+  @Prop() toggleConnectWallet!: () => void
+  async onClick() {
+    const providerOptions = {
+      walletconnect: {
+        package: WalletConnectProvider, // required
+        options: {
+          infuraId: '9d6ecc41833d434a921bf5de878f834f' // required
+        }
+      },
+      fortmatic: {
+        package: Fortmatic, // required
+        options: {
+          key: 'FORTMATIC_KEY' // required
+        }
+      },
+      torus: {
+        package: Torus, // required
+        options: {
+          /*
+          networkParams: {
+            host: 'https://localhost:8545', // optional
+            chainId: 1337, // optional
+            networkId: 1337 // optional
+          },
+          config: {
+            buildEnv: 'development' // optional
+          }
+          */
+        }
+      },
+      authereum: {
+        package: Authereum // required
+      }
+    }
+
+    const web3Modal = new Web3Modal({
+      network: 'mainnet', // optional
+      cacheProvider: false, // optional
+      providerOptions // required
+    })
+
+    const provider = await web3Modal.connect()
+
+    const web3 = new Web3(provider)
+  }
 }
 </script>
 
