@@ -1,16 +1,24 @@
 import { ActionTree } from 'vuex'
-import Web3 from 'web3'
-import WalletConnectProvider from '@walletconnect/web3-provider';
-import WalletLink from 'walletlink';
+import WalletConnectProvider from '@walletconnect/web3-provider'
+import WalletLink from 'walletlink'
 
-declare const ethereum: any
+declare let ethereum: any
+const NETWORK_KEY = '_net_pvd_'
 
 export default {
+  checkLoginState({ dispatch }) {
+    const wallet = localStorage.getItem(NETWORK_KEY)
+    wallet && dispatch(`${wallet}`)
+  },
   async loginMetamask({ commit }): Promise<void> {
     commit('LOGIN_ERROR', false)
     try {
       const accounts = await ethereum.request({ method: 'eth_requestAccounts' })
       const chainId = ethereum.networkVersion
+      localStorage.setItem(NETWORK_KEY, 'loginMetamask')
+
+      ethereum.on('accountsChanged', (accounts: string[]) => commit('ACCOUNT', accounts[0]))
+      ethereum.on('chainChanged', (_chainId: number) => window.location.reload())
 
       commit('ACCOUNT', accounts[0])
       commit('CHAIN_ID', chainId)
@@ -22,12 +30,13 @@ export default {
   async loginWalletConnect({ commit }): Promise<void> {
     commit('LOGIN_ERROR', false)
     try {
-      const provider: any = new WalletConnectProvider({
+      ethereum = new WalletConnectProvider({
         infuraId: 'd24fd61c09f846e589e0140edac85bd5' // Required
-      });
-      const accounts = await provider.enable();
-      console.log(accounts);
-      
+      })
+      const accounts = (await ethereum.enable()) as string[]
+      localStorage.setItem(NETWORK_KEY, 'loginWalletConnect')
+      console.log(accounts)
+
       commit('ACCOUNT', accounts[0])
     } catch (error) {
       console.log('error', error)
@@ -42,14 +51,17 @@ export default {
       const walletLink = new WalletLink({
         appName: 'Cream'
       })
-      const ethereum = walletLink.makeWeb3Provider(ETH_JSONRPC_URL, CHAIN_ID)
+      ethereum = walletLink.makeWeb3Provider(ETH_JSONRPC_URL, CHAIN_ID)
       const accounts = await ethereum.enable()
+      localStorage.setItem(NETWORK_KEY, 'loginCoinbaseWallet')
       commit('ACCOUNT', accounts[0])
     } catch {
       commit('LOGIN_ERROR', true)
     }
   },
   logout({ commit }) {
+    ethereum?.disconnect?.()
+    localStorage.removeItem(NETWORK_KEY)
     commit('ACCOUNT', '')
   }
 } as ActionTree<any, {}>

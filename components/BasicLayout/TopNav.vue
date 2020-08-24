@@ -1,83 +1,75 @@
 <template lang="pug">
-  nav#top-nav
-    ModalConnectWallet(
-      v-if="showConnectWallet",
-      :isConnected="account",
-      :accountDisplay="accountDisplay"
-      :toggleConnectWallet="toggleConnectWallet",
-      @connectWallet="connectWallet",
-      @logout="logout"
-    )
+nav#top-nav
+  ModalConnectWallet(
+    v-if='showConnectWallet',
+    :isConnected='account',
+    :accountDisplay='accountDisplay',
+    :toggleConnectWallet='toggleConnectWallet',
+    @connectWallet='connectWallet',
+    @logout='logout'
+  )
 
-    .d-flex
-      .left-side
-        div(@click="onClickNavIcon")
-          Icon(name="fa-bars", :size="20")
-        nuxt-link(class="logo", to="/") Cream
+  .d-flex
+    .left-side
+      div(@click='onClickNavIcon')
+        Icon(name='fa-bars', :size='20')
+      nuxt-link.logo(to='/') Cream
 
-      .right-side
-        Button(
-          v-if="!account"
-          class="button-primary"
-          :onClick="onClickConnectWalletButton"
-        ) Connect wallet
+    .right-side
+      Button.button-primary(v-if='!account', :onClick='onClickConnectWalletButton') Connect wallet
 
-        //- Button(class="button-red") Wrong network
+      //- Button(class="button-red") Wrong network
 
-        Button(
-          v-else,
-          :onClick="onClickConnectWalletButton"
-        )
-          Avatar(
-            :address="account",
-            :size="16"
-          )
-          span {{ accountDisplay }}
-
-          
+      Button(v-else, :onClick='onClickConnectWalletButton')
+        Avatar(:address='account', :size='16')
+        span {{ accountDisplay }}
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop, Emit } from "vue-property-decorator";
+import { Component, Vue, Prop, Emit } from 'vue-property-decorator'
 import { Getter } from 'vuex-class'
 
 @Component
 export default class TopNav extends Vue {
-  @Prop() sidebarIsOpen!: boolean;
+  @Prop() sidebarIsOpen!: boolean
 
-  @Getter("Auth/account") account!: string
-  @Getter("Auth/accountDisplay") accountDisplay!: string
-  @Getter("Auth/loginError") loginError!: boolean
+  @Getter('Auth/account') account!: string
+  @Getter('Auth/accountDisplay') accountDisplay!: string
+  @Getter('Auth/loginError') loginError!: boolean
 
-  showConnectWallet: boolean = false;
-  isLoading: boolean = false;
+  showConnectWallet: boolean = false
+  isLoading: boolean = false
 
   toggleConnectWallet(): void {
-    this.showConnectWallet = !this.showConnectWallet;
+    this.showConnectWallet = !this.showConnectWallet
   }
 
   onClickConnectWalletButton(): void {
-    this.toggleConnectWallet();
+    this.toggleConnectWallet()
+  }
+
+  mounted(): void {
+    this.$store.dispatch('Auth/checkLoginState')
   }
 
   async connectWallet(wallet: string): Promise<void> {
     switch (wallet) {
       case 'metamask': {
-        await this.$store.dispatch('Auth/loginMetamask');
+        await this.$store.dispatch('Auth/loginMetamask')
         if (!this.loginError) {
           this.onClickConnectWalletButton()
         }
         break
       }
       case 'walletconnect': {
-        await this.$store.dispatch('Auth/loginWalletConnect');
+        await this.$store.dispatch('Auth/loginWalletConnect')
         if (!this.loginError) {
           this.onClickConnectWalletButton()
         }
         break
       }
       case 'coinbase': {
-        await this.$store.dispatch('Auth/loginCoinbaseWallet');
+        await this.$store.dispatch('Auth/loginCoinbaseWallet')
         if (!this.loginError) {
           this.onClickConnectWalletButton()
         }
@@ -88,12 +80,12 @@ export default class TopNav extends Vue {
 
   logout() {
     this.showConnectWallet = false
-    this.$store.dispatch("Auth/logout")
+    this.$store.dispatch('Auth/logout')
   }
 
-  @Emit("onClickNavIcon")
+  @Emit('onClickNavIcon')
   onClickNavIcon(): boolean {
-    return !this.sidebarIsOpen;
+    return !this.sidebarIsOpen
   }
 }
 </script>
@@ -135,7 +127,7 @@ nav#top-nav
 
     .right-side
       /deep/
-        button
-          .avatar-jazzicon
-            margin-right: 8px
+      button
+        .avatar-jazzicon
+          margin-right: 8px
 </style>
